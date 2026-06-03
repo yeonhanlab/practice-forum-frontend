@@ -1,5 +1,5 @@
 function MainFooter() {
-    return <></>;
+    return <>Foot</>;
 }
 
 export default MainFooter;
