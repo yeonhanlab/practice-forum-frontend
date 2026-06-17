@@ -1,7 +1,7 @@
 import { RouterProvider } from "react-router";
 import GetRouter from "./router/GetRouter.tsx";
 import { ThemeProvider } from "styled-components";
-import { lightTheme } from "./styles/theme.ts";
+import { darkTheme, lightTheme } from "./styles/theme.ts";
 import { GlobalStyle } from "./styles/GlobalStyle.tsx";
 import { useEffect, useState } from "react";
 import { ThemeContext, type ThemeType } from "./contexts/theme/ThemeContext.ts";
@@ -22,7 +22,7 @@ function App() {
 
     return (
         <ThemeContext.Provider value={{ theme, onChangeTheme }}>
-            <ThemeProvider theme={lightTheme}>
+            <ThemeProvider theme={ theme === "light" ? lightTheme : darkTheme }>
                 <GlobalStyle />
                 <RouterProvider router={GetRouter}></RouterProvider>
             </ThemeProvider>
