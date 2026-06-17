@@ -10,7 +10,9 @@ const FooterContainer = styled.footer`
 `;
 
 function MainFooter() {
-    return <FooterContainer></FooterContainer>;
+    return <FooterContainer>
+        <p>Copyright 2026 My Website</p>
+    </FooterContainer>;
 }
 
 export default MainFooter;
