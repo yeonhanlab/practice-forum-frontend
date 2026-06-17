@@ -4,18 +4,30 @@ import type { ButtonHTMLAttributes, ElementType, ReactNode } from "react";
 export type ButtonColorType = "primary" | "secondary" | "success" | "warning" | "info";
 export type ButtonVariantType = "contained" | "text" | "icon";
 
-const StyledButton = styled.button<{ $color: ButtonColorType; $variant: ButtonVariantType }>`
+const StyledButton = styled.button<{
+    $color: ButtonColorType;
+    $variant: ButtonVariantType;
+    $fullWidth?: boolean;
+}>`
+    width: ${props => (props.$fullWidth ? "100%" : "auto")};
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    aspect-ratio: ${props => (props.$variant === "icon" ? "1" : "auto")};
     font-size: 14px;
     font-weight: 600;
     color: ${props => (props.$variant === "contained" ? "#ffffff" : "inherit")};
-    background-color: ${props => (props.$variant === "contained" ? props.theme.colors[props.$color] : "transparent")};
+    background-color: ${props =>
+        props.$variant === "contained" ? props.theme.colors[props.$color] : "transparent"};
     padding: ${props => (props.$variant === "icon" ? "8px" : "8px 12px")};
-    border-radius: 6px;
+    border-radius: ${props => (props.$variant === "icon" ? "50%" : "6px")};
     transition: all 0.5s;
 
     &:hover {
         filter: brightness(0.8);
-        background-color: ${props => (props.$variant === "contained" ? undefined : props.theme.colors.background.default)};
+        background-color: ${props =>
+            props.$variant === "contained" ? undefined : props.theme.colors.background.default};
+    }
 `;
 
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
