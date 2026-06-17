@@ -28,7 +28,7 @@ interface Props extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 function Button({ children, color, variant, ...props }: Props) {
     return (
-        <StyledButton $color={color} $variant={variant} {props as any}>
+        <StyledButton $color={color} $variant={variant} {...(props as any)}>
             {children}
         </StyledButton>
     );
