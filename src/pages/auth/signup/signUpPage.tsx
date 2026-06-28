@@ -4,20 +4,66 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import styled from "styled-components";
 import { Gender } from "../../../types/user.type.ts";
 import Button from "../../../components/common/button/Button.tsx";
+import { useNavigate } from "react-router";
 
 function SignUpPage() {
+
+    const navigate = useNavigate();
+
     const {
         register,
         handleSubmit,
+        setError,
         formState: { errors, isSubmitting },
     } = useForm<SignUpInputType>({
         resolver: zodResolver(signUpSchema),
         mode: "onBlur",
     });
 
+
+    const onSubmit = async ( data: SignUpInputType ) => {
+
+        try {
+            const { passwordConfirm, ...submitData } = data;
+
+            const response = await fetch("http://localhost:8000/user/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(submitData),
+            });
+
+            if(!response.ok) {
+                const errorResult = await response.json();
+                throw new Error(errorResult.message || "서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
+            }
+
+            alert("회원가입이 완료되었습니다. 로그인을 진행해주세요.");
+            navigate("/auth/signin");
+
+        } catch (error) {
+            console.log(error);
+            if (error instanceof Error) {
+                const errorMessage = error.message;
+                if (errorMessage === "이미 사용 중인 아이디입니다.") {
+                    setError("username", { message: errorMessage });
+                } else if (errorMessage === "이미 가입된 이메일입니다.") {
+                    setError("email", { message: errorMessage });
+                } else if (errorMessage === "이미 사용 중인 닉네임입니다.") {
+                    setError("nickname", { message: errorMessage });
+                } else {
+                    setError("root", { message: errorMessage, });
+                }
+            }
+        }
+
+    };
+
+
     return (
         <AuthContainer>
-            <FormCard>
+            <FormCard onSubmit={handleSubmit(onSubmit)}>
                 <Title>회원가입</Title>
                 <SubTitle>토론대난투에 오신 것을 환영합니다!</SubTitle>
                 <FormBox>
@@ -57,7 +103,11 @@ function SignUpPage() {
                     </InputGroup>
                     <InputGroup>
                         <Label htmlFor={"nickname"}>닉네임</Label>
-                        <Input {...register("nickname")} $hasError={!!errors.name} id={"name"} />
+                        <Input
+                            {...register("nickname")}
+                            $hasError={!!errors.nickname}
+                            id={"nickname"}
+                        />
                         {errors.nickname && <ErrorMessage>{errors.nickname.message}</ErrorMessage>}
                     </InputGroup>
                     <InputGroup>
@@ -69,7 +119,7 @@ function SignUpPage() {
                             type={"email"}
                         />
                         {errors.email && <ErrorMessage>{errors.email.message}</ErrorMessage>}
-                    </InputGroup>{" "}
+                    </InputGroup>
                     <InputGroup>
                         <Label htmlFor={"phoneNumber"}>전화번호</Label>
                         <Input
@@ -104,6 +154,7 @@ function SignUpPage() {
                         {errors.gender && <ErrorMessage>{errors.gender.message}</ErrorMessage>}
                     </InputGroup>
                 </FormBox>
+                {errors.root && <RootErrorMessage>{errors.root.message}</RootErrorMessage>}
                 <Button
                     color={"primary"}
                     variant={"contained"}
@@ -214,5 +265,13 @@ const Select = styled.select<{ $hasError?: boolean }>`
         border-color: ${props =>
             props.$hasError ? props.theme.colors.error : props.theme.colors.primary};
     }
+`;
+
+const RootErrorMessage = styled.div`
+    font-size: 13px;
+    color: ${props => props.theme.colors.error};
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 16px;
 `;
 
