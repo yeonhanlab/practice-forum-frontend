@@ -5,9 +5,10 @@ import styled from "styled-components";
 import { Gender } from "../../../types/user.type.ts";
 import Button from "../../../components/common/button/Button.tsx";
 import { useNavigate } from "react-router";
+import axiosInstance from "../../../api/axiosInstance.tsx";
+import * as axios from "axios";
 
 function SignUpPage() {
-
     const navigate = useNavigate();
 
     const {
@@ -20,46 +21,28 @@ function SignUpPage() {
         mode: "onBlur",
     });
 
-
-    const onSubmit = async ( data: SignUpInputType ) => {
-
+    const onSubmit = async (data: SignUpInputType) => {
         try {
             const { passwordConfirm, ...submitData } = data;
 
-            const response = await fetch("http://localhost:8000/user/create", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(submitData),
-            });
-
-            if(!response.ok) {
-                const errorResult = await response.json();
-                throw new Error(errorResult.message || "서버 에러가 발생했습니다. 잠시 후 다시 시도해주세요.")
-            }
+            await axiosInstance.post("/user/create", submitData);
 
             alert("회원가입이 완료되었습니다. 로그인을 진행해주세요.");
             navigate("/auth/signin");
-
         } catch (error) {
             console.log(error);
-            if (error instanceof Error) {
-                const errorMessage = error.message;
-                if (errorMessage === "이미 사용 중인 아이디입니다.") {
-                    setError("username", { message: errorMessage });
-                } else if (errorMessage === "이미 가입된 이메일입니다.") {
-                    setError("email", { message: errorMessage });
-                } else if (errorMessage === "이미 사용 중인 닉네임입니다.") {
-                    setError("nickname", { message: errorMessage });
-                } else {
-                    setError("root", { message: errorMessage, });
-                }
+
+            let errorMessage = "회원가입 중 오류가 발생했습니다.";
+
+            if (axios.isAxiosError(error)) {
+                errorMessage = error.response?.data?.message || errorMessage;
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
             }
+
+            setError("root", { message: errorMessage });
         }
-
     };
-
 
     return (
         <AuthContainer>
@@ -274,4 +257,3 @@ const RootErrorMessage = styled.div`
     text-align: center;
     margin-bottom: 16px;
 `;
-
